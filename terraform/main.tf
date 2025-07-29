@@ -9,3 +9,10 @@ module "lambda" {
   project     = var.project
   bucket_name = module.datalake.bucket_id
 }
+
+module "glue" {
+  source = "./modules/glue"
+
+  project     = var.project
+  bucket_name = module.datalake.bucket_id
+}

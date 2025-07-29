@@ -13,8 +13,6 @@ fake = Faker('es_CO')
 BUCKET_NAME = os.getenv("BUCKET_NAME")
 S3_PREFIX = 'bronze' 
 
-
-
 TIPOS_ENERGIA = ['Eólica', 'Hidroeléctrica', 'Nuclear']
 TIPOS_TRANSACCION = ['Compra', 'Venta']
 TIPOS_IDENTIFICACION = ['CC', 'NIT', 'CE']
@@ -22,7 +20,7 @@ TIPOS_IDENTIFICACION = ['CC', 'NIT', 'CE']
 def generar_csvs(fecha_actual):
     NUM_PROVEEDORES = 5
     NUM_CLIENTES = 20
-    NUM_TRANSACCIONES = 50
+    NUM_TRANSACCIONES = 500
 
     # Proveedores
     proveedores = []
@@ -84,15 +82,14 @@ def subir_a_s3(df, bucket, key):
 
 def lambda_handler(event, context):
     fecha_actual = datetime.now().strftime('%Y-%m-%d')
-    ruta_particion = f"{S3_PREFIX}/fecha={fecha_actual}"
-
     archivos = generar_csvs(fecha_actual)
 
     for nombre_archivo, df in archivos.items():
+        ruta_particion = f"{S3_PREFIX}/{nombre_archivo.split('.')[0]}/fecha={fecha_actual}"
         s3_key = f"{ruta_particion}/{nombre_archivo}"
         subir_a_s3(df, BUCKET_NAME, s3_key)
 
     return {
         'statusCode': 200,
-        'body': f"Archivos cargados en {ruta_particion}"
+        'body': f"Archivos cargados para la fecha {fecha_actual}"
     }
